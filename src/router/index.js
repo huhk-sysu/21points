@@ -1,7 +1,6 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 import Room from '../pages/Room'
-import Result from '../pages/Result'
 import Play from '../pages/Play'
 
 Vue.use(Router)

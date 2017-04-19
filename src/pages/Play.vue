@@ -1,9 +1,7 @@
 <template>
   <div>
 
-    <!--<h1>{{player}}</h1>-->
-  
-    <div v-show="player === 'blue' && playing">
+    <div v-if="player === 'blue' && playing">
       <h2>对手</h2>
       <div>
         <number-card v-for="card in redCards" :value="card" :key="card"></number-card>
@@ -17,7 +15,7 @@
       <h2>你</h2>
     </div>
 
-    <div v-show="player === 'red' && playing">
+    <div v-if="player === 'red' && playing">
       <h2>对手</h2>
       <div>
         <number-card v-for="card in blueCards" :value="card" :key="card"></number-card>
@@ -31,12 +29,13 @@
       <h2>你</h2>
     </div>
 
-    <div class="buttons"  v-show="playing">
+    <div class="buttons"  v-if="playing">
       <el-button type="primary" @click='clickGetCardButton()' :disabled='!canGetCard || !turn || boom'>摸牌</el-button>
       <el-button type="warning" @click='clickStopButton()' :disabled='!canGetCard || !turn'>放弃</el-button>
     </div>
 
-    <h2 v-show="!playing || !turn">请等待……</h2>
+    <h2 v-if="!playing">请等待对手进入……</h2>
+    <h2 v-show="playing && !turn">请等待对手行动……</h2>
 
     <div class="readme">
       <el-collapse :value="[1]">
@@ -65,13 +64,26 @@ export default {
       canGetCard: true,
       turn: false,
       playing: false,
-      boom: false,
       errorMsg: null
+    }
+  },
+  computed: {
+    blueSum: function () {
+      return this.blueCards.reduce((prev, cur) => prev + cur, 0)
+    },
+    redSum: function () {
+      return this.redCards.reduce((prev, cur) => prev + cur, 0)
+    },
+    boom: function () {
+      return this[this.player + 'Sum'] > 21
+    },
+    opponent: function () {
+      return this.player === 'blue' ? 'red' : 'blue'
     }
   },
   sockets: {
     player: function (player) {
-      console.log('emit: player')
+      // console.log('emit: player')
       this.player = player
       if (this.player === 'blue') {
         this.$message('请等待另一名玩家进入后即可开始游戏！')
@@ -81,36 +93,37 @@ export default {
       this.$message.error(msg)
       this.$router.push('Room')
     },
-    initCards: function ({ blueCards, redCards }) {
-      console.log('emit: initCards')
+    updateCards: function ({ blueCards, redCards }) {
+      // console.log('emit: updateCards')
+      // console.log(blueCards, redCards)
       this.blueCards = blueCards
       this.redCards = redCards
-      this.playing = this.canGetCard = true
     },
-    newCard: function ({ player, newCard }) {
-      console.log('emit: newCard')
-      this[player + 'Cards'].push(newCard)
-      if (this.canGetCard && this[this.player + 'Sum'] > 21) {
-        this.boom = true
-      }
+    begin: function () {
+      // console.log('emit: begin')
+      this.playing = this.canGetCard = true
     },
     turn: function () {
       this.turn = true
     },
     finish: function ({status, blueCards, redCards}) {
-      console.log('emit: finish')
-      console.log(status)
+      // console.log('emit: finish')
+      // console.log(status)
       this.blueCards = blueCards
       this.redCards = redCards
-      let msg
+      let title, msg
       if (status === 'draw') {
-        msg = '平局！'
+        title = '平局！'
       } else if (status === this.player) {
-        msg = '你赢了！'
+        title = '你赢了！'
       } else {
-        msg = '你输了！'
+        title = '你输了！'
       }
-      this.$alert(msg, '游戏结果', {
+      msg = '你的手牌为：' + this[this.player + 'Cards'].join(',') +
+            '，总和为' + this[this.player + 'Sum'] +
+            '，对方手牌为：' + this[this.opponent + 'Cards'].join(',') +
+            '，总和为' + this[this.opponent + 'Sum']
+      this.$alert(msg, title, {
         confirmButtonText: '确定',
         callback: () => {
           this.$router.push('Room')
@@ -137,13 +150,8 @@ export default {
       })
     }
   },
-  computed: {
-    blueSum: function () {
-      return this.blueCards.reduce((prev, cur) => prev + cur, 0)
-    },
-    redSum: function () {
-      return this.redCards.reduce((prev, cur) => prev + cur, 0)
-    }
+  created: function () {
+    this.$socket.emit('ready')
   }
 }
 </script>

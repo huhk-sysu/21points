@@ -9,7 +9,8 @@ import 'element-ui/lib/theme-default/index.css'
 
 Vue.config.productionTip = false
 
-Vue.use(VueSocketio, 'http://localhost:3000')
+Vue.use(VueSocketio, 'http://localhost:3000')  // for test
+// Vue.use(VueSocketio, 'http://api.huhk-sysu.cn:3000')  // for publish
 Vue.use(ElementUI)
 
 /* eslint-disable no-new */

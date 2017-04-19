@@ -1,6 +1,6 @@
 <template>
   
-  <img :src="`https://dummyimage.com/100x50/ddd/f00.jpg&text=${text}`" alt="text" class="card">
+  <img :src="`/static/cards/${text}.jpg`" alt="text" class="card">
   
 </template>
 
@@ -15,9 +15,6 @@ export default {
   },
   computed: {
     text: function () {
-      if (this.value === 0) {
-        return 'X'
-      }
       return this.value + ''
     }
   }

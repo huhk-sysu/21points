@@ -15,7 +15,6 @@ export default {
   methods: {
     ready: function () {
       this.$router.push('Play')
-      this.$socket.emit('ready')
     }
   }
 }
