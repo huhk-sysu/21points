@@ -96,6 +96,11 @@ export default {
     updateCards: function ({ blueCards, redCards }) {
       // console.log('emit: updateCards')
       // console.log(blueCards, redCards)
+      if (this.player === 'blue') {
+        redCards[0] = 0
+      } else {
+        blueCards[0] = 0
+      }
       this.blueCards = blueCards
       this.redCards = redCards
     },
