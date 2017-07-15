@@ -36,18 +36,15 @@
 
     <h2 v-if="!playing">请等待对手进入……</h2>
     <h2 v-show="playing && !turn">请等待对手行动……</h2>
-
-    <div class="readme">
-      <el-collapse :value="[1]">
-        <el-collapse-item title="游戏说明" name="1">
-          <div>游戏中共有11张牌，点数分别为1到11。</div>
-          <div>2名玩家轮流进行回合，在一个玩家的回合内，他可以选择摸牌或者放弃，一旦放弃则以后都不能再摸牌。</div>
-          <div>当玩家手中的牌点数大于21点时，将不能再摸牌（称为“爆牌”）。</div>
-          <div>当两名玩家都停止抽牌后，比较两人手中牌的点数之和。若双方都没爆牌或都已爆牌，则点数最接近21点者获胜，否则，未爆牌的玩家获胜。</div>
-        </el-collapse-item>
-      </el-collapse>
-    </div>
-    
+    <el-card class="box-card readme">
+      <h2>游戏说明</h2>
+      <ul>
+        <li>游戏中共有11张牌，点数分别为1到11。</li>
+        <li>2名玩家轮流进行回合，在一个玩家的回合内，他可以选择摸牌或者放弃，一旦放弃则以后都不能再摸牌。</li>
+        <li>当玩家手中的牌点数大于21点时，将不能再摸牌（称为“爆牌”）。</li>
+        <li>当两名玩家都停止抽牌后，比较两人手中牌的点数之和。若双方都没爆牌或都已爆牌，则点数最接近21点者获胜，否则，未爆牌的玩家获胜。</li>
+      </ul>
+    </el-card>    
   </div>
 </template>
 
@@ -55,7 +52,7 @@
 import numberCard from '../components/NumberCard'
 
 export default {
-  name: 'hello',
+  name: 'Play',
   data () {
     return {
       player: '',
@@ -91,6 +88,7 @@ export default {
     },
     hasError: function ({ msg }) {
       this.$message.error(msg)
+      this.$socket.emit('leave')
       this.$router.push('Room')
     },
     updateCards: function ({ blueCards, redCards }) {
@@ -131,6 +129,7 @@ export default {
       this.$alert(msg, title, {
         confirmButtonText: '确定',
         callback: () => {
+          this.$socket.emit('leave')
           this.$router.push('Room')
         }
       })
@@ -152,11 +151,12 @@ export default {
       }).then(() => {
         this.$socket.emit('stop', this.player)
         this.canGetCard = false
+        this.turn = false
       })
     }
   },
   created: function () {
-    this.$socket.emit('ready')
+    // this.$socket.emit('ready')
   }
 }
 </script>
@@ -167,6 +167,9 @@ export default {
   margin: 0 auto;
   width: 500px;
   margin-top: 20px;
+}
+
+.readme ul {
   text-align: left;
 }
 </style>
